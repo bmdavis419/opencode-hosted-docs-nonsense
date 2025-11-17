@@ -1,6 +1,8 @@
 # dependencies (bun install)
 node_modules
 
+dev-vol/
+
 # output
 out
 dist

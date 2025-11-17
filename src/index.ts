@@ -1,29 +1,18 @@
-import { Effect, Scope, Stream } from "effect";
+import { Effect, Stream } from "effect";
 import path from "node:path";
 
 const program = Effect.scoped(
   Effect.gen(function* () {
-    const scope = yield* Effect.scope;
-
-    const volumeRoot = yield* Effect.sync(() => Bun.env.VOLUME_ROOT);
+    let volumeRoot = yield* Effect.sync(() => Bun.env.VOLUME_ROOT);
 
     if (!volumeRoot) {
-      console.error("VOLUME_PATH is not set");
-      return Effect.die("VOLUME_PATH is not set");
+      volumeRoot = yield* Effect.sync(() =>
+        path.join(process.cwd(), "dev-vol")
+      );
     }
 
-    const configPath = yield* Effect.sync(() =>
-      path.join(volumeRoot, "opencode.jsonc")
-    );
-
     const proc = yield* Effect.try({
-      try: () =>
-        Bun.spawn(["opencode", "serve", "--port=5252"], {
-          env: {
-            ...Bun.env,
-            OPENCODE_CONFIG: configPath,
-          },
-        }),
+      try: () => Bun.spawn(["opencode", "serve", "--port=8080"], {}),
       catch: (error) => {
         console.error("failed to spawn opencode server", error);
         return null;
@@ -37,7 +26,7 @@ const program = Effect.scoped(
       proc.kill();
     };
 
-    yield* Scope.addFinalizer(scope, Effect.sync(cleanupFunc));
+    yield* Effect.addFinalizer(() => Effect.sync(cleanupFunc));
 
     yield* Effect.sync(() => {
       const handleSignal = () => {
