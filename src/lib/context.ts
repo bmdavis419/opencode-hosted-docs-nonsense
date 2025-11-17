@@ -8,7 +8,7 @@ type ContextRepo = {
   branch?: string;
 };
 
-const contextRepos: ContextRepo[] = [
+export const contextRepos: ContextRepo[] = [
   {
     name: "effect",
     url: "https://github.com/Effect-TS/effect",
@@ -66,7 +66,9 @@ const syncRepo = (args: { repo: ContextRepo; reposDir: string }) =>
 
     yield* Effect.addFinalizer(() =>
       Effect.sync(() => {
-        proc.kill();
+        if (!proc.killed) {
+          proc.kill();
+        }
       })
     );
 
