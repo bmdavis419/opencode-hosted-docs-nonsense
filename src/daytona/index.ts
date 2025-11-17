@@ -278,6 +278,16 @@ const daytonaService = Effect.gen(function* () {
 
           yield* Effect.log("Server started");
 
+          const sshAccess = yield* Effect.tryPromise(() =>
+            sandbox.createSshAccess(60)
+          ).pipe(
+            Effect.catchAll(() => Effect.die("failed to create ssh access"))
+          );
+
+          console.log(
+            `ssh ${sshAccess.token}@ssh.app.daytona.io then run opencode attach http://localhost:8080`
+          );
+
           console.log(previewLink.url);
 
           yield* Effect.never;
