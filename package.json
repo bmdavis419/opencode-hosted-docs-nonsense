@@ -1,0 +1,20 @@
+{
+  "name": "opencode-daytona-scratch",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@daytonaio/sdk": "^0.115.0",
+    "@opencode-ai/sdk": "^1.0.68",
+    "effect": "^3.19.4"
+  }
+}
