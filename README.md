@@ -14,5 +14,5 @@ DAYTONA_API_KEY=...
 OPENCODE_API_KEY=sk-...
 ```
 
-3. run `bun dev` to start the server
+3. run `bun start` to start the server
 4. connect to the server with the outputs from the terminal

@@ -2,36 +2,18 @@ import { Daytona, Image, Sandbox } from "@daytonaio/sdk";
 import { env } from "bun";
 import path from "node:path";
 import { Effect, Fiber, pipe } from "effect";
-import { ASK_AGENT_PROMPT, config, DOCS_AGENT_PROMPT } from "./config";
+import {
+  ASK_AGENT_PROMPT,
+  config,
+  contextRepos,
+  DOCS_AGENT_PROMPT,
+  type ContextRepo,
+} from "./config";
 import type { ExecuteResponse } from "@daytonaio/sdk/src/types/ExecuteResponse";
 
 const SANDBOX_VOLUME_ROOT = "/context";
 
 const contextService = Effect.gen(function* () {
-  type ContextRepo = {
-    name: string;
-    url: string;
-    branch?: string;
-  };
-
-  const contextRepos: ContextRepo[] = [
-    {
-      name: "effect",
-      url: "https://github.com/Effect-TS/effect",
-      branch: "main",
-    },
-    {
-      name: "svelte",
-      url: "https://github.com/sveltejs/svelte.dev",
-      branch: "main",
-    },
-    {
-      name: "daytona",
-      url: "https://github.com/daytonaio/daytona",
-      branch: "main",
-    },
-  ];
-
   const bashrcAddon = `
     echo "STARTING..."
     sleep 2
@@ -82,14 +64,6 @@ const contextService = Effect.gen(function* () {
         const { sandbox } = args;
 
         yield* Effect.log("Preparing ssh access...");
-
-        // yield* Effect.tryPromise(() =>
-        //   sandbox.fs.setFilePermissions("/root/.bashrc", {
-        //     mode: "755",
-        //   })
-        // ).pipe(
-        //   Effect.catchAll(() => Effect.die("failed to set .bashrc permissions"))
-        // );
 
         const bashrcResult = yield* Effect.tryPromise(() =>
           sandbox.fs.downloadFile("/root/.bashrc")
@@ -210,6 +184,10 @@ const daytonaService = Effect.gen(function* () {
 
   const opencodeApiKey = yield* Effect.sync(() => env.OPENCODE_API_KEY || "");
 
+  const runInBackground = yield* Effect.sync(
+    () => env.RUN_IN_BACKGROUND === "true"
+  );
+
   const daytona = yield* Effect.sync(
     () => new Daytona({ apiKey, target: "us" })
   );
@@ -225,9 +203,9 @@ const daytonaService = Effect.gen(function* () {
   const sandbox = yield* Effect.tryPromise(() =>
     daytona.create({
       resources: {
-        cpu: 4,
-        memory: 8,
-        disk: 8,
+        cpu: 2,
+        memory: 3,
+        disk: 4,
       },
       image,
       envVars: {
@@ -238,19 +216,21 @@ const daytonaService = Effect.gen(function* () {
     })
   ).pipe(Effect.catchAll(() => Effect.die("failed to create sandbox")));
 
-  yield* Effect.addFinalizer(() =>
-    Effect.all(
-      [
-        Effect.log("Cleaning up daytona resources..."),
-        Effect.tryPromise(() => sandbox.delete()).pipe(
-          Effect.catchAll(() => Effect.logError("failed to delete sandbox"))
-        ),
-      ],
-      {
-        concurrency: 2,
-      }
-    )
-  );
+  if (!runInBackground) {
+    yield* Effect.addFinalizer(() =>
+      Effect.all(
+        [
+          Effect.log("Cleaning up daytona resources..."),
+          Effect.tryPromise(() => sandbox.delete()).pipe(
+            Effect.catchAll(() => Effect.logError("failed to delete sandbox"))
+          ),
+        ],
+        {
+          concurrency: 2,
+        }
+      )
+    );
+  }
 
   const contextService = yield* ContextService;
 
@@ -322,7 +302,7 @@ const daytonaService = Effect.gen(function* () {
           yield* Effect.log("Server started");
 
           const sshAccess = yield* Effect.tryPromise(() =>
-            sandbox.createSshAccess(60)
+            sandbox.createSshAccess(24)
           ).pipe(
             Effect.catchAll(() => Effect.die("failed to create ssh access"))
           );
@@ -332,10 +312,12 @@ const daytonaService = Effect.gen(function* () {
           );
 
           console.log(
-            `CONNECT WITH LOCAL TERMINAL: opencode attach ${previewLink.url}`
+            `CONNECT WITH LOCAL TERMINAL: opencode attach ${previewLink.url}\n\n`
           );
 
-          yield* Effect.never;
+          if (!runInBackground) {
+            yield* Effect.never;
+          }
         })
       ),
   };
@@ -353,6 +335,8 @@ const program = Effect.gen(function* () {
   const service = yield* DaytonaService;
   yield* service.setupContext();
   yield* service.startServer();
+
+  process.exit(0);
 }).pipe(
   Effect.provide(DaytonaService.Default),
   Effect.onInterrupt(() => Effect.log("Interrupted")),

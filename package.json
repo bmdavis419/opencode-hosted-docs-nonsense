@@ -4,9 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run src/daytona/index.ts",
-    "build": "bun build src/daytona/index.ts --target bun --outfile dist/index.js",
-    "start": "bun dist/index.js"
+    "start:bg": "RUN_IN_BACKGROUND=true bun run src/daytona/index.ts",
+    "start": "bun run src/daytona/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

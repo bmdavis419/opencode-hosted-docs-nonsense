@@ -14,6 +14,11 @@ export const contextRepos: ContextRepo[] = [
     branch: "main",
   },
   {
+    name: "opencode",
+    url: "https://github.com/sst/opencode",
+    branch: "main",
+  },
+  {
     name: "svelte",
     url: "https://github.com/sveltejs/svelte.dev",
     branch: "main",
