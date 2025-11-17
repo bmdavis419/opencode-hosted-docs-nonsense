@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "dev": "bun run src/daytona/index.ts",
     "build": "bun build src/daytona/index.ts --target bun --outfile dist/index.js",
     "start": "bun dist/index.js"
   },

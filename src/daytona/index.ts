@@ -32,6 +32,12 @@ const contextService = Effect.gen(function* () {
     },
   ];
 
+  const bashrcAddon = `
+    echo "STARTING..."
+    sleep 2
+    opencode attach http://localhost:8080
+  `;
+
   const syncRepo = (args: {
     repo: ContextRepo;
     reposDir: string;
@@ -71,6 +77,34 @@ const contextService = Effect.gen(function* () {
     });
 
   return {
+    prepareSshAccess: (args: { sandbox: Sandbox }) =>
+      Effect.gen(function* () {
+        const { sandbox } = args;
+
+        yield* Effect.log("Preparing ssh access...");
+
+        // yield* Effect.tryPromise(() =>
+        //   sandbox.fs.setFilePermissions("/root/.bashrc", {
+        //     mode: "755",
+        //   })
+        // ).pipe(
+        //   Effect.catchAll(() => Effect.die("failed to set .bashrc permissions"))
+        // );
+
+        const bashrcResult = yield* Effect.tryPromise(() =>
+          sandbox.fs.downloadFile("/root/.bashrc")
+        ).pipe(Effect.catchAll(() => Effect.die("failed to download .bashrc")));
+
+        const newBashrc = bashrcResult.toString() + bashrcAddon;
+
+        yield* Effect.tryPromise(() =>
+          sandbox.fs.uploadFile(Buffer.from(newBashrc), "/root/.bashrc")
+        ).pipe(
+          Effect.catchAll(() => Effect.die("failed to upload new .bashrc"))
+        );
+
+        yield* Effect.log("Ssh access prepared");
+      }),
     syncContextRepos: (args: { sandbox: Sandbox }) =>
       Effect.gen(function* () {
         const { sandbox } = args;
@@ -174,6 +208,8 @@ const daytonaService = Effect.gen(function* () {
     yield* Effect.die("DAYTONA_API_KEY is not set");
   }
 
+  const opencodeApiKey = yield* Effect.sync(() => env.OPENCODE_API_KEY || "");
+
   const daytona = yield* Effect.sync(
     () => new Daytona({ apiKey, target: "us" })
   );
@@ -188,9 +224,15 @@ const daytonaService = Effect.gen(function* () {
 
   const sandbox = yield* Effect.tryPromise(() =>
     daytona.create({
+      resources: {
+        cpu: 4,
+        memory: 8,
+        disk: 8,
+      },
       image,
       envVars: {
         OPENCODE_CONFIG: path.join(SANDBOX_VOLUME_ROOT, "opencode.json"),
+        OPENCODE_API_KEY: opencodeApiKey,
       },
       public: true,
     })
@@ -217,6 +259,8 @@ const daytonaService = Effect.gen(function* () {
       Effect.gen(function* () {
         yield* Effect.log("Setting up context...");
 
+        yield* contextService.prepareSshAccess({ sandbox });
+
         const { configPath, promptPath, askPromptPath } =
           yield* contextService.syncConfig({ sandbox });
 
@@ -233,28 +277,27 @@ const daytonaService = Effect.gen(function* () {
 
           const serverFork = yield* pipe(
             Effect.gen(function* () {
-              yield* Effect.addFinalizer(() =>
-                Effect.gen(function* () {
-                  const originalLog = console.log;
-                  console.log = (...data: any[]) => {
-                    const shouldSuppress = data.some(
-                      (item) =>
-                        (typeof item === "string" &&
-                          item.includes("isAxiosError")) ||
-                        (typeof item === "object" && "isAxiosError" in item)
-                    );
+              const sessionId = yield* Effect.sync(() => crypto.randomUUID());
 
-                    if (shouldSuppress) return;
+              yield* Effect.tryPromise(() =>
+                sandbox.process.createSession(sessionId)
+              );
 
-                    return originalLog(...data);
-                  };
+              const startResult = yield* Effect.tryPromise(() =>
+                sandbox.process.executeSessionCommand(sessionId, {
+                  command: "opencode serve --port=8080 --hostname=0.0.0.0",
                 })
               );
-              yield* Effect.tryPromise(() =>
-                sandbox.process.executeCommand(
-                  "opencode serve --port=8080 --hostname=0.0.0.0"
-                )
-              );
+
+              const cmdId = startResult.cmdId;
+
+              if (cmdId) {
+                const command = yield* Effect.tryPromise(() =>
+                  sandbox.process.getSessionCommandLogs(sessionId, cmdId)
+                );
+
+                yield* Effect.log("server started", command.output);
+              }
             }).pipe(
               Effect.catchAll(() => Effect.die("failed to start server"))
             ),
@@ -285,10 +328,12 @@ const daytonaService = Effect.gen(function* () {
           );
 
           console.log(
-            `ssh ${sshAccess.token}@ssh.app.daytona.io then run opencode attach http://localhost:8080`
+            `\nCONNECT WITH SSH: ssh ${sshAccess.token}@ssh.app.daytona.io\n\n`
           );
 
-          console.log(previewLink.url);
+          console.log(
+            `CONNECT WITH LOCAL TERMINAL: opencode attach ${previewLink.url}`
+          );
 
           yield* Effect.never;
         })

@@ -92,6 +92,7 @@ export const config: Config = {
     docs: {
       prompt: "{file:./prompts/docs-agent.txt}",
       disable: false,
+      model: "opencode/big-pickle",
       description:
         "Get answers about libraries and frameworks by searching their source code",
       permission: {
@@ -118,6 +119,7 @@ export const config: Config = {
       prompt: "{file:./prompts/ask-agent.txt}",
       disable: false,
       description: "Answer coding questions from the user",
+      model: "opencode/big-pickle",
       permission: {
         webfetch: "ask",
         edit: "deny",
