@@ -1,11 +1,10 @@
+import { env, spawn } from "bun";
 import { Effect, Stream } from "effect";
 import path from "node:path";
 
 const program = Effect.scoped(
   Effect.gen(function* () {
-    let volumeRoot = yield* Effect.sync(
-      () => Bun.env.RAILWAY_VOLUME_MOUNT_PATH
-    );
+    let volumeRoot = yield* Effect.sync(() => env.RAILWAY_VOLUME_MOUNT_PATH);
 
     if (!volumeRoot) {
       volumeRoot = yield* Effect.sync(() =>
@@ -19,9 +18,9 @@ const program = Effect.scoped(
 
     const proc = yield* Effect.try({
       try: () =>
-        Bun.spawn(["opencode", "serve", "--port=8080", "--hostname=0.0.0.0"], {
+        spawn(["opencode", "serve", "--port=8080", "--hostname=0.0.0.0"], {
           env: {
-            ...Bun.env,
+            ...env,
             OPENCODE_CONFIG: configPath,
           },
         }),

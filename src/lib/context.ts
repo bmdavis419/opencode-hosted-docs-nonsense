@@ -1,3 +1,4 @@
+import { spawn } from "bun";
 import { Effect, Stream } from "effect";
 import { existsSync } from "fs";
 import path from "path";
@@ -19,6 +20,11 @@ export const contextRepos: ContextRepo[] = [
     url: "https://github.com/sveltejs/svelte.dev",
     branch: "main",
   },
+  {
+    name: "daytona",
+    url: "https://github.com/daytonaio/daytona",
+    branch: "main",
+  },
 ];
 
 const syncRepo = (args: { repo: ContextRepo; reposDir: string }) =>
@@ -37,7 +43,7 @@ const syncRepo = (args: { repo: ContextRepo; reposDir: string }) =>
       yield* Effect.log(`Cloning repo ${repo.name}...`);
       proc = yield* Effect.try({
         try: () =>
-          Bun.spawn([
+          spawn([
             "git",
             "clone",
             "--depth",
@@ -58,7 +64,7 @@ const syncRepo = (args: { repo: ContextRepo; reposDir: string }) =>
     } else {
       yield* Effect.log(`Pulling repo ${repo.name}...`);
       proc = yield* Effect.try({
-        try: () => Bun.spawn(["git", "pull"], { cwd: repoPath }),
+        try: () => spawn(["git", "pull"], { cwd: repoPath }),
         catch: (error) =>
           new Error(`failed to pull repo ${repo.name}`, { cause: error }),
       });

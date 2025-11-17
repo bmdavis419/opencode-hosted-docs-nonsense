@@ -2,12 +2,11 @@ import { Effect } from "effect";
 import path from "node:path";
 import { ensureContextRepos } from "../lib/context";
 import { makeOpencodeConfig } from "../lib/config";
+import { env } from "bun";
 
 const program = Effect.scoped(
   Effect.gen(function* () {
-    let volumeRoot = yield* Effect.sync(
-      () => Bun.env.RAILWAY_VOLUME_MOUNT_PATH
-    );
+    let volumeRoot = yield* Effect.sync(() => env.RAILWAY_VOLUME_MOUNT_PATH);
 
     if (!volumeRoot) {
       volumeRoot = yield* Effect.sync(() =>

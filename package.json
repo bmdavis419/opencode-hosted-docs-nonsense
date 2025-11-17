@@ -5,12 +5,11 @@
   "private": true,
   "scripts": {
     "setup": "bun src/load-context",
-    "build": "bun build src/load-context/index.ts --outfile dist/setup.js && bun build src/server/index.ts --outfile dist/server.js",
+    "build": "bun build src/load-context/index.ts --target bun --outfile dist/setup.js && bun build src/server/index.ts --target bun --outfile dist/server.js",
     "start": "bun dist/setup.js && bun dist/server.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^24.10.1",
     "json-schema-to-typescript": "^15.0.4"
   },
   "peerDependencies": {

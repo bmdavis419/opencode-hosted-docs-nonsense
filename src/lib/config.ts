@@ -2,6 +2,7 @@ import type { Config } from "@opencode-ai/sdk";
 import { Effect, Stream } from "effect";
 import { contextRepos } from "./context";
 import path from "path";
+import { file, spawn } from "bun";
 
 const DOCS_AGENT_PROMPT = (volumeRoot: string) => `
 You are an expert internal agent who's job is to answer coding questions and provide accurate and up to date info on different technologies, libraries, frameworks, or tools you're using based on the library codebases you have access to.
@@ -58,7 +59,7 @@ export const makeOpencodeConfig = (args: { volumeRoot: string }) =>
     const { volumeRoot } = args;
 
     const mkdirProc = yield* Effect.try({
-      try: () => Bun.spawn(["mkdir", "-p", path.join(volumeRoot, "prompts")]),
+      try: () => spawn(["mkdir", "-p", path.join(volumeRoot, "prompts")]),
       catch: (error) => {
         console.error("failed to spawn mkdir", error);
         return new Error("failed to spawn mkdir", { cause: error });
@@ -146,17 +147,17 @@ export const makeOpencodeConfig = (args: { volumeRoot: string }) =>
     const promptPath = yield* Effect.sync(() =>
       path.join(volumeRoot, "prompts", "docs-agent.txt")
     );
-    const promptFile = yield* Effect.sync(() => Bun.file(promptPath));
+    const promptFile = yield* Effect.sync(() => file(promptPath));
 
     const askPromptPath = yield* Effect.sync(() =>
       path.join(volumeRoot, "prompts", "ask-agent.txt")
     );
-    const askPromptFile = yield* Effect.sync(() => Bun.file(askPromptPath));
+    const askPromptFile = yield* Effect.sync(() => file(askPromptPath));
 
     const configPath = yield* Effect.sync(() =>
       path.join(volumeRoot, "opencode.json")
     );
-    const configFile = yield* Effect.sync(() => Bun.file(configPath));
+    const configFile = yield* Effect.sync(() => file(configPath));
 
     yield* Effect.all([
       Effect.tryPromise({
