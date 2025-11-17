@@ -5,7 +5,9 @@ import { makeOpencodeConfig } from "../lib/config";
 
 const program = Effect.scoped(
   Effect.gen(function* () {
-    let volumeRoot = yield* Effect.sync(() => Bun.env.VOLUME_ROOT);
+    let volumeRoot = yield* Effect.sync(
+      () => Bun.env.RAILWAY_VOLUME_MOUNT_PATH
+    );
 
     if (!volumeRoot) {
       volumeRoot = yield* Effect.sync(() =>

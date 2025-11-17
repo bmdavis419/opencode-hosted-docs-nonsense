@@ -1,0 +1,17 @@
+node_modules
+dev-vol
+dist
+.git
+.gitignore
+Dockerfile*
+docker-compose*
+.dockerignore
+README.md
+LICENSE
+.vscode
+.idea
+*.md
+coverage*
+.env
+.editorconfig
+

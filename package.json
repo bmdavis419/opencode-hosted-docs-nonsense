@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun src/index.ts"
+    "setup": "bun src/load-context",
+    "build": "bun build src/load-context/index.ts --outfile dist/setup.js && bun build src/server/index.ts --outfile dist/server.js",
+    "start": "bun dist/setup.js && bun dist/server.js"
   },
   "devDependencies": {
     "@types/bun": "latest",

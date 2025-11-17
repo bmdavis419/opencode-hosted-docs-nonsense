@@ -1,5 +1,5 @@
 import type { Config } from "@opencode-ai/sdk";
-import { Effect } from "effect";
+import { Effect, Stream } from "effect";
 import { contextRepos } from "./context";
 import path from "path";
 
@@ -44,11 +44,38 @@ When responding:
 - When outputting code snippets, include comments that explain what each piece does
 - Always bias towards simple practical examples over complex theoretical explanations
 - Give your response in markdown format, make sure to have spacing between code blocks and other content
+
+Special instructions for Svelte:
+
+- always use typescript for svelte code (<script lang="ts">)
+- if you are just outputting stuff that goes in the script tag, tag the code as typescript code so the syntax highlighting in the view works correctly (AND DO NOT INCLUDE THE SCRIPT TAG IN THE OUTPUT)
+- if you are outputting full svelte files (script, markup, styles), tag the code as html so the syntax highlighting in the view works correctly
+- always try to answer the questions by just outputting stuff that goes in the script tag, only include markup and styles if absolutely necessary
 `;
 
 export const makeOpencodeConfig = (args: { volumeRoot: string }) =>
   Effect.gen(function* () {
     const { volumeRoot } = args;
+
+    const mkdirProc = yield* Effect.try({
+      try: () => Bun.spawn(["mkdir", "-p", path.join(volumeRoot, "prompts")]),
+      catch: (error) => {
+        console.error("failed to spawn mkdir", error);
+        return new Error("failed to spawn mkdir", { cause: error });
+      },
+    });
+
+    const outputStream = Stream.fromReadableStream({
+      evaluate: () => mkdirProc.stdout,
+      onError: (error) => {
+        console.error("failed to create output stream", error);
+        return null;
+      },
+    });
+
+    yield* Stream.decodeText(outputStream).pipe(
+      Stream.runForEach(() => Effect.void)
+    );
 
     let config: Config = {
       agent: {
