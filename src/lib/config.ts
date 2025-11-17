@@ -100,7 +100,7 @@ export const makeOpencodeConfig = (args: { volumeRoot: string }) =>
           permission: {
             webfetch: "ask",
             edit: "deny",
-            bash: "ask",
+            bash: "allow",
           },
           mode: "primary",
           tools: {
