@@ -1,12 +1,12 @@
 {
-  "name": "opencode-web-server",
+  "name": "opencode-daytona-server",
   "module": "index.ts",
   "type": "module",
   "private": true,
   "scripts": {
-    "setup": "bun src/load-context",
-    "build": "bun build src/load-context/index.ts --target bun --outfile dist/setup.js && bun build src/server/index.ts --target bun --outfile dist/server.js",
-    "start": "bun dist/setup.js && bun dist/server.js"
+    "dev": "bun run src/daytona/index.ts",
+    "build": "bun build src/daytona/index.ts --target bun --outfile dist/index.js",
+    "start": "bun dist/index.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
