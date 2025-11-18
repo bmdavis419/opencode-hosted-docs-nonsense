@@ -207,6 +207,7 @@ const daytonaService = Effect.gen(function* () {
         memory: 3,
         disk: 4,
       },
+      autoStopInterval: 0,
       image,
       envVars: {
         OPENCODE_CONFIG: path.join(SANDBOX_VOLUME_ROOT, "opencode.json"),
