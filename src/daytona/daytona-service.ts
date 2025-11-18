@@ -1,4 +1,4 @@
-import { Daytona, Image, Sandbox } from "@daytonaio/sdk";
+import { Daytona, Image } from "@daytonaio/sdk";
 import { env } from "bun";
 import path from "node:path";
 import { Effect, Fiber, pipe } from "effect";
@@ -162,4 +162,3 @@ export class DaytonaService extends Effect.Service<DaytonaService>()(
     scoped: daytonaService,
   }
 ) {}
-
