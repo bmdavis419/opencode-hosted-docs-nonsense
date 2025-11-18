@@ -1,0 +1,62 @@
+---
+import { Image } from 'astro:assets'
+import textArrowIcon from '@assets/icons/text-arrow.svg?raw'
+import Default from '@astrojs/starlight/components/Footer.astro'
+import ThemeSelect from './ThemeSelect.astro'
+import { major, minor, patch } from 'semver'
+
+const version = import.meta.env.VERSION || '0.0.1'
+const [maj, min] = [major(version), minor(version)]
+const release = `${maj}.${min}`
+// TODO: switch to SDK
+
+const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${release}.0`
+---
+
+<Default {...Astro.props}>
+  <slot />
+</Default>
+<footer class="docs-footer__container">
+  <div class="docs-footer__container__support-links">
+    <p>
+      <Fragment set:html={textArrowIcon} />{
+        Astro.props.labels['footer.needHelp']
+      } -
+      <a href="https://go.daytona.io/slack"
+        >{Astro.props.labels['footer.reachSupport']}</a
+      >
+    </p>
+    <p>
+      <Fragment set:html={textArrowIcon} />{
+        Astro.props.labels['footer.latestUpdates']
+      } - <a href="https://github.com/daytonaio/daytona/commits/main/"
+        >{Astro.props.labels['footer.viewChangelog']}</a
+      >
+    </p>
+    <p>
+      <Fragment set:html={textArrowIcon} />{
+        Astro.props.labels['footer.dotfilesInsider']
+      } - <a href="https://www.daytona.io/dotfiles/"
+        >{Astro.props.labels['footer.readBlog']}</a
+      >
+    </p>
+  </div>
+
+  <div class="docs-footer__container__bottom">
+    <div class="docs-footer__container__bottom-block">
+      <div><p>© {new Date().getFullYear()} Daytona Platforms, Inc.</p></div>
+      <div class="divider"></div>
+    </div>
+
+    <ThemeSelect />
+
+    <div class="menu-list">
+      <a href="https://www.daytona.io/company/privacy-policy"
+        >{Astro.props.labels['footer.privacyPolicy']}</a
+      >
+      <a href="https://www.daytona.io/company/terms-of-service"
+        >{Astro.props.labels['footer.termsOfService']}</a
+      >
+    </div>
+  </div>
+</footer>

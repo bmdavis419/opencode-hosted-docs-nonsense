@@ -1,0 +1,26 @@
+header:
+  license:
+    spdx-id: AGPL-3.0
+    copyright-owner: Daytona Platforms Inc.
+    content: |
+      Copyright 2025 Daytona Platforms Inc.
+      SPDX-License-Identifier: AGPL-3.0
+  paths:
+    - '**/*.go'
+    - '**/*.sh'
+    - '**/*.js'
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '**/*.py'
+
+  paths-ignore:
+    - 'libs/**'
+    - '!libs/computer-use/**'
+    - 'apps/api/src/generate-openapi.ts'
+    - 'apps/runner/pkg/api/docs/docs.go'
+    - 'examples/**'
+    - 'apps/docs/**'
+    - 'hack/**'
+    - 'apps/daemon/pkg/toolbox/docs/docs.go'
+
+  comment: on-failure

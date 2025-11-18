@@ -1,0 +1,92 @@
+---
+title: Language Server Protocol
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides Language Server Protocol (LSP) support through Sandbox instances. This enables advanced language features like code completion, diagnostics, and more.
+
+## Creating LSP Servers
+
+Daytona SDK provides an option to create LSP servers in Python and TypeScript. The `path_to_project` argument is relative to the current Sandbox working directory when no leading `/` is used. The working directory is specified by WORKDIR when it is present in the Dockerfile, and otherwise falls back to the user's home directory.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import Daytona, LspLanguageId
+
+# Create Sandbox
+daytona = Daytona()
+sandbox = daytona.create()
+
+# Create LSP server for Python
+lsp_server = sandbox.create_lsp_server(
+    language_id=LspLanguageId.PYTHON,
+    path_to_project="workspace/project"
+)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona, LspLanguageId } from '@daytonaio/sdk'
+
+// Create sandbox
+const daytona = new Daytona()
+const sandbox = await daytona.create({
+    language: 'typescript'
+})
+
+// Create LSP server for TypeScript
+const lspServer = await sandbox.createLspServer(
+    LspLanguageId.TYPESCRIPT,
+    "workspace/project"
+)
+```
+
+</TabItem>
+</Tabs>
+
+See: [create_lsp_server (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxcreate_lsp_server), [createLspServer (TypeScript SDK)](/docs/typescript-sdk/sandbox#createlspserver)
+
+### Supported Languages
+
+The supported languages for creating LSP servers with the Daytona SDK are defined by the `LspLanguageId` enum:
+
+| Enum Value                   | Description                         |
+|------------------------------|-------------------------------------|
+| `LspLanguageId.PYTHON`       | Python language server.             |
+| `LspLanguageId.TYPESCRIPT`   | TypeScript/JavaScript language server. |
+
+See: [LspLanguageId (Python SDK)](/docs/python-sdk/sync/lsp-server/#lsplanguageid), [LspLanguageId (TypeScript SDK)](/docs/typescript-sdk/lsp-server/#lsplanguageid)
+
+## LSP Features
+
+Daytona SDK provides LSP features for code analysis and editing.
+
+### Code Completion
+
+Daytona SDK provides an option to get code completions for a specific position in a file using Python and TypeScript.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+completions = lsp_server.completions(
+    path="workspace/project/main.py",
+    position={"line": 10, "character": 15}
+)
+print(f"Completions: {completions}")
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const completions = await lspServer.completions(
+    "workspace/project/main.ts",
+    { line: 10, character: 15 }
+)
+console.log('Completions:', completions)
+```
+</TabItem>
+</Tabs>
+
+See: [completions (Python SDK)](/docs/python-sdk/sync/lsp-server/#lspservercompletions), [completions (TypeScript SDK)](/docs/typescript-sdk/lsp-server/#completions)

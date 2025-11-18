@@ -1,0 +1,264 @@
+---
+title: Snapshots
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import Label from '@components/Label.astro'
+
+Snapshots are Sandbox templates that can be created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. New Sandboxes can be created from a custom Snapshot pre-configured with your required dependencies, settings, and resources, or from the [default Snapshot](#default-snapshot).
+
+## Creating Snapshots
+
+Snapshots can be created in one of four ways: [from a public image](#using-a-public-image), [from a private image](#using-private-registries), [from a local image](#using-a-local-image), or [using the Declarative Builder](#using-the-declarative-builder).
+
+### Using a Public Image
+
+To create a Snapshot from a public image, follow these steps:
+
+1. Visit the Dashboard and click on [Snapshots](https://app.daytona.io/dashboard/snapshots)
+2. Click on **Create Snapshot**
+3. Enter the name and tag of any publicly accessible image from Docker Hub (e.g. `alpine:3.21.3`) or from another public container registry (e.g. `my-public-registry.com/custom-alpine:3.21`)
+
+Optionally, set the entrypoint field. If the image does not have a long-running entrypoint, Daytona will automatically run `sleep infinity` to prevent the container from exiting immediately.
+
+:::note
+Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same idea applies to tags such as `lts` or `stable` and we recommend avoiding those when defining an image.
+:::
+
+Once the Snapshot is pulled, validated and has an `Active` state, it is ready to be used.
+
+### Images from Private Registries
+
+To create a Snapshot from an image that is available in a private container registry:
+
+1. Go to the [Registries](https://app.daytona.io/dashboard/registries) page in the Dashboard
+2. Click the **Add Registry** button.
+3. Fill out the form with an appropriate custom name, URL, username, password, and project (if applicable)
+4. Once the Container Registry is created, you may go back to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page
+5. When creating the Snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. `my-private-registry.com/<my-project>/custom-alpine:3.21`)
+
+The next step is the same; simply set the `CreateSandboxFromSnapshotParams` field to use the custom Snapshot and no further authentication is needed.
+
+#### Using a Private Docker Hub Image
+
+To use a private Docker Hub image, you'll need to [add a Container Registry](/docs/en/snapshots#images-from-private-registries) with your Docker Hub credentials:
+
+- **Registry URL**: Set this to `docker.io`
+- **Username**: Enter your Docker Hub username (the account with access to the private image)
+- **Password**: Use a [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/) (not your account password)
+- **Create the Snapshot**: Once the registry is added, you can create a Snapshot using the full image path as the image name: `docker.io/<username>/<image>:<tag>`
+
+### Using a Local Image
+
+In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
+
+To create a Snapshot from a local image:
+
+1. Run `docker images` to ensure the image and tag you want to use is available
+2. Run `daytona snapshot push <your_local_docker_image>` to create a Snapshot and push it to Daytona, e.g.:
+
+```bash
+daytona snapshot push custom-alpine:3.21 --name alpine-minimal
+```
+
+:::tip
+Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have
+
+For example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
+:::
+
+:::note
+Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
+
+For more information, see the [CLI documentation](/docs/en/tools/cli#daytona-snapshot-push).
+:::
+
+Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you. The COPY/ADD commands will be automatically parsed and added to the context - to manually add files to the context you can use the `--context` flag.
+
+```bash
+daytona snapshot create data-analysis01 --dockerfile ./Dockerfile
+```
+
+```text
+Building image from /Users/idagelic/docs/Dockerfile
+Step 1/5 : FROM alpine:latest
+
+...
+
+ ⡿  Waiting for the Snapshot to be validated ...
+
+ ...
+
+ ✓  Use 'harbor-transient.internal.daytona.app/daytona/trying-daytona:0.0.1' to create a new sandbox using this Snapshot
+
+```
+
+### Using the Declarative Builder
+
+The declarative builder allows you to define your Snapshots using a code-first approach. See [Declarative Builder](/docs/declarative-builder) for more information.
+
+### Specifying Resources
+
+Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
+
+To customize these resources, use the `Resources` class to define exactly what you need:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import (
+    Daytona,
+    CreateSnapshotParams,
+    Image,
+    Resources,
+)
+
+daytona = Daytona()
+
+# Create a Snapshot with custom resources
+daytona.snapshot.create(
+    CreateSnapshotParams(
+        name="my-snapshot",
+        image=Image.debian_slim("3.12"),
+        # All resource parameters are optional:
+        resources=Resources(
+          cpu=2,
+          memory=4,
+          disk=8,
+        ),
+    ),
+    on_logs=print,
+)
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona, Image } from "@daytonaio/sdk";
+
+const daytona = new Daytona();
+
+// Create a Snapshot with custom resources
+await daytona.snapshot.create(
+  {
+    name: "my-snapshot",
+    image: Image.debianSlim("3.13"),
+    // All resource parameters are optional:
+    resources: {
+      cpu: 2,
+      memory: 4,
+      disk: 8,
+    },
+  },
+  { onLogs: console.log }
+);
+```
+
+</TabItem>
+</Tabs>
+
+
+Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
+
+## Using Snapshots
+
+To use a Snapshot in your Sandbox, specify the `snapshot` field in the `CreateSandboxFromSnapshotParams` object:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    snapshot="my-snapshot-name",
+))
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const sandbox = await daytona.create({
+  snapshot: "my-snapshot-name",
+})
+```
+</TabItem>
+</Tabs>
+
+For examples of running code inside a sandbox, see the [Getting Started Guide](/docs/en/getting-started/#run-code-inside-a-sandbox).
+
+## Deleting Snapshots
+
+To delete custom Snapshots:
+
+1. Go to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page
+2. Click the three dots at the end of the row for the Snapshot you want to delete
+3. Click the `Delete` button that appears
+
+:::tip
+
+To temporarily disable a Snapshot, instead of deleting, you can click `Disable`. This will prevent the Snapshot from being used in any new Sandboxes but will not delete it.
+
+:::
+
+## Running Docker in a Sandbox
+
+Daytona Sandboxes can run Docker containers inside them (**Docker-in-Docker**), enabling you to build, test, and deploy containerized applications. This is particularly useful when your projects have dependencies on external services like databases, message queues, or other microservices.
+
+Agents can seamlessly interact with these services since they run within the same sandbox environment, providing better isolation and security compared to external service dependencies.
+
+### Creating a DinD Snapshot
+
+You can create a Snapshot with Docker support using pre-built Docker-in-Docker images as a base or by manually installing Docker in a custom image.
+
+#### Using Pre-built Images
+
+The following base images are widely used for creating Docker-in-Docker snapshots or can be used as a base for a custom Dockerfile:
+
+- `docker:28.3.3-dind` - Official Docker-in-Docker image (Alpine-based, lightweight)
+- `docker:28.3.3-dind-rootless` - Rootless Docker-in-Docker for enhanced security
+- `docker:28.3.2-dind-alpine3.22` - Docker-in-Docker image with Alpine 3.22
+
+#### Manual Docker Installation
+
+Alternatively, you can install Docker manually in a custom Dockerfile:
+
+```dockerfile
+FROM ubuntu:22.04
+# Install Docker using the official install script
+RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
+```
+
+### Use Cases
+
+- Run databases (PostgreSQL, Redis, MySQL) and other services
+- Build and test containerized applications
+- Deploy microservices and their dependencies
+- Create isolated development environments with full container orchestration
+
+:::note
+Docker-in-Docker Sandboxes require additional resources due to the Docker daemon overhead. Consider allocating at least 2 vCPU and 4GiB of memory for optimal performance.
+:::
+
+## Default Snapshot
+
+When a Sandbox is created with no Snapshot specified, Daytona uses a default Snapshot that includes `python`, `node`, their language servers, and several common pip packages:
+- `anthropic` (v0.49.0)
+- `beautifulsoup4` (v4.13.3)
+- `daytona_sdk` (v0.11.1)
+- `django` (v5.1.7)
+- `flask` (v3.1.0)
+- `huggingface` (v0.0.1)
+- `instructor` (v1.7.3)
+- `keras` (v3.9.0)
+- `langchain` (v0.3.20)
+- `llama-index` (v0.12.22)
+- `matplotlib` (v3.10.1)
+- `numpy` (v2.2.3)
+- `ollama` (v0.4.7)
+- `openai` (v1.65.4)
+- `opencv-python` (v4.11.0.86)
+- `pandas` (v2.2.3)
+- `pillow` (v11.1.0)
+- `pydantic-ai` (v0.0.35)
+- `requests` (v2.32.3)
+- `scikit-learn` (v1.6.1)
+- `scipy` (v1.15.2)
+- `seaborn` (v0.13.2)
+- `SQLAlchemy` (v2.0.38)
+- `transformers` (v4.49.0)
