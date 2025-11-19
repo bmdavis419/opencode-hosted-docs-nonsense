@@ -1,6 +1,5 @@
 import { Daytona, Image } from "@daytonaio/sdk";
 import { Effect } from "effect";
-import path from "node:path";
 
 const SVELTE_SNAPSHOT_NAME = "svelte-docs-snapshot";
 
@@ -20,16 +19,19 @@ export const createSvelteSnapshot = Effect.gen(function* () {
         name: SVELTE_SNAPSHOT_NAME,
         // WTF man
         image: Image.base("debian:stable-slim")
-          .cmd(["apt-get update"])
-          .runCommands([
+          .runCommands(
             "apt-get update",
-            "apt-get install -y git && apt-get install -y curl && rm -rf /var/lib/apt/lists/*]",
-            "curl -fsSL https://bun.com/install | bash",
+            "apt-get install -y git curl unzip && rm -rf /var/lib/apt/lists/*",
+            "curl -fsSL https://bun.com/install | bash"
+          )
+          .dockerfileCommands([
+            "ENV BUN_INSTALL=/root/.bun",
+            "ENV PATH=$BUN_INSTALL/bin:$PATH",
           ])
-          .runCommands([
+          .runCommands(
             "bun add -g opencode-ai@latest",
-            "mkdir -p context/repos && git clone --depth 1 --single-branch --branch main https://github.com/sveltejs/svelte.dev context/repos/svelte",
-          ]),
+            "mkdir -p context/repos && git clone --depth 1 --single-branch --branch main https://github.com/sveltejs/svelte.dev context/repos/svelte"
+          ),
         resources: {
           cpu: 3,
           memory: 4,

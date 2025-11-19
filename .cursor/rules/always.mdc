@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+
+## Context
+
+When writing code for effect, daytona, or svelte, if there's anything you're unsure of, use the repos in /dev-vol/context-repos as a reference.
