@@ -51,15 +51,3 @@
 
 - This is a Bun project (not Node.js) - use Bun APIs when applicable
 - No Cursor or Copilot rules files present in this repository
-
-## Daytona Context
-
-- The full Daytona open source codebase is available in `daytona-repo/`
-- Use this source code as context when answering questions about Daytona internals or usage
-- This is a git subtree clone of https://github.com/daytonaio/daytona
-
-## Effect Context
-
-- The full Effect-TS open source codebase is available in `effect-repo/`
-- Use this source code as context when answering questions about Effect usage, patterns, or internals
-- This is a git subtree clone of https://github.com/Effect-TS/effect

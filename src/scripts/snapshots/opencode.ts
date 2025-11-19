@@ -1,9 +1,11 @@
 import { Daytona, Image } from "@daytonaio/sdk";
 import { Effect } from "effect";
+import { SNAPSHOT_NAMES, contextRepos } from "../../config";
 
-const SVELTE_SNAPSHOT_NAME = "svelte-docs-snapshot";
+const SNAPSHOT_NAME = SNAPSHOT_NAMES.opencode;
+const REPO = contextRepos.opencode;
 
-export const createSvelteSnapshot = Effect.gen(function* () {
+export const createOpenCodeSnapshot = Effect.gen(function* () {
   const apiKey = process.env.DAYTONA_API_KEY;
   if (!apiKey) {
     yield* Effect.die("DAYTONA_API_KEY is not set");
@@ -16,8 +18,7 @@ export const createSvelteSnapshot = Effect.gen(function* () {
   yield* Effect.tryPromise(() =>
     daytona.snapshot.create(
       {
-        name: SVELTE_SNAPSHOT_NAME,
-        // WTF man
+        name: SNAPSHOT_NAME,
         image: Image.base("debian:stable-slim")
           .runCommands(
             "apt-get update",
@@ -30,7 +31,7 @@ export const createSvelteSnapshot = Effect.gen(function* () {
           ])
           .runCommands(
             "bun add -g opencode-ai@latest",
-            "mkdir -p context/repos && git clone --depth 1 --single-branch --branch main https://github.com/sveltejs/svelte.dev context/repos/svelte"
+            `mkdir -p context/repos && git clone --depth 1 --single-branch --branch ${REPO.branch || "main"} ${REPO.url} context/repos/${REPO.name}`
           ),
         resources: {
           cpu: 3,
@@ -61,4 +62,4 @@ export const createSvelteSnapshot = Effect.gen(function* () {
   })
 );
 
-await createSvelteSnapshot.pipe(Effect.runPromise);
+await createOpenCodeSnapshot.pipe(Effect.runPromise);

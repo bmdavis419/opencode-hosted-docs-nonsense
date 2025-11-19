@@ -1,5 +1,5 @@
 import type { Config } from "@opencode-ai/sdk";
-import path from "path";
+import path from "node:path";
 
 export type ContextRepo = {
   name: string;
@@ -7,37 +7,50 @@ export type ContextRepo = {
   branch?: string;
 };
 
-export const contextRepos: ContextRepo[] = [
-  {
+export const contextRepos = {
+  effect: {
     name: "effect",
     url: "https://github.com/Effect-TS/effect",
     branch: "main",
   },
-  {
+  opencode: {
     name: "opencode",
     url: "https://github.com/sst/opencode",
     branch: "production",
   },
-  {
+  svelte: {
     name: "svelte",
     url: "https://github.com/sveltejs/svelte.dev",
     branch: "main",
   },
-  {
+  daytona: {
     name: "daytona",
     url: "https://github.com/daytonaio/daytona",
     branch: "main",
   },
-];
+} as const;
 
-export const DOCS_AGENT_PROMPT = (volumeRoot: string) => `
+export const SNAPSHOT_NAMES = {
+  effect: "effect-docs-snapshot",
+  opencode: "opencode-docs-snapshot",
+  svelte: "svelte-docs-snapshot",
+  daytona: "daytona-docs-snapshot",
+} as const;
+
+export type RepoName = keyof typeof contextRepos;
+export type SnapshotName = (typeof SNAPSHOT_NAMES)[RepoName];
+export type RepoConfig = (typeof contextRepos)[RepoName];
+
+const SANDBOX_VOLUME_ROOT = "/context";
+
+export const DOCS_AGENT_PROMPT = (repoName: RepoName) => `
 You are an expert internal agent who's job is to answer coding questions and provide accurate and up to date info on different technologies, libraries, frameworks, or tools you're using based on the library codebases you have access to.
 
-Currently you have access to the following codebases at the following paths:
+Currently you have access to the following codebase at the following path:
 
-${contextRepos.map((repo) => `- ${repo.name}: ${path.join(volumeRoot, "repos", repo.name)}`).join("\n")}
+- ${repoName}: ${path.join(SANDBOX_VOLUME_ROOT, "repos", repoName)}
 
-When asked a question regarding one of the codebases, search the codebase to get an accurate answer.
+When asked a question regarding the codebase, search the codebase to get an accurate answer.
 
 Always search the codebase first before using the web to try to answer the question.
 
@@ -80,7 +93,7 @@ Special instructions for Svelte:
 - always try to answer the questions by just outputting stuff that goes in the script tag, only include markup and styles if absolutely necessary
 `;
 
-export const config: Config = {
+export const getOpenCodeConfig = (repoName: RepoName): Config => ({
   agent: {
     build: {
       disable: true,
@@ -146,4 +159,6 @@ export const config: Config = {
       },
     },
   },
-};
+});
+
+export const SANDBOX_VOLUME_ROOT_PATH = SANDBOX_VOLUME_ROOT;
