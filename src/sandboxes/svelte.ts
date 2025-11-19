@@ -1,18 +1,11 @@
 import { Effect, Fiber, pipe } from "effect";
 import { SandboxService } from "../services/sandbox";
-import { contextRepos, SNAPSHOT_NAMES } from "../config";
 
 const program = Effect.gen(function* () {
   const service = yield* SandboxService;
 
-  const config = {
-    repoName: "svelte" as const,
-    snapshotName: SNAPSHOT_NAMES.svelte,
-    repo: contextRepos.svelte,
-  };
-
-  const sandbox = yield* service.createSandbox(config);
-  yield* service.setupConfig({ sandbox, config });
+  const sandbox = yield* service.createSandbox("svelte");
+  yield* service.setupConfig({ sandbox, name: "svelte" });
   yield* service.setupSshAccess({ sandbox });
   yield* service.startServer({ sandbox });
 }).pipe(

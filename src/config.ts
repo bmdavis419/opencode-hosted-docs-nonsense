@@ -5,6 +5,7 @@ export type ContextRepo = {
   name: string;
   url: string;
   branch?: string;
+  snapshotName: string;
 };
 
 export const contextRepos = {
@@ -12,34 +13,29 @@ export const contextRepos = {
     name: "effect",
     url: "https://github.com/Effect-TS/effect",
     branch: "main",
+    snapshotName: "effect-docs-snapshot",
   },
   opencode: {
     name: "opencode",
     url: "https://github.com/sst/opencode",
     branch: "production",
+    snapshotName: "opencode-docs-snapshot",
   },
   svelte: {
     name: "svelte",
     url: "https://github.com/sveltejs/svelte.dev",
     branch: "main",
+    snapshotName: "svelte-docs-snapshot",
   },
   daytona: {
     name: "daytona",
     url: "https://github.com/daytonaio/daytona",
     branch: "main",
+    snapshotName: "daytona-docs-snapshot",
   },
-} as const;
-
-export const SNAPSHOT_NAMES = {
-  effect: "effect-docs-snapshot",
-  opencode: "opencode-docs-snapshot",
-  svelte: "svelte-docs-snapshot",
-  daytona: "daytona-docs-snapshot",
-} as const;
+} satisfies Record<string, ContextRepo>;
 
 export type RepoName = keyof typeof contextRepos;
-export type SnapshotName = (typeof SNAPSHOT_NAMES)[RepoName];
-export type RepoConfig = (typeof contextRepos)[RepoName];
 
 const SANDBOX_VOLUME_ROOT = "/context";
 

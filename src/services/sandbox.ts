@@ -5,19 +5,12 @@ import path from "node:path";
 import { Effect, Fiber, pipe } from "effect";
 import {
   ASK_AGENT_PROMPT,
+  contextRepos,
   DOCS_AGENT_PROMPT,
   getOpenCodeConfig,
   SANDBOX_VOLUME_ROOT_PATH,
-  type RepoConfig,
   type RepoName,
-  type SnapshotName,
 } from "../config";
-
-export type SandboxConfig = {
-  repoName: RepoName;
-  snapshotName: SnapshotName;
-  repo: RepoConfig;
-};
 
 const sandboxService = Effect.gen(function* () {
   const apiKey = yield* Effect.sync(() => env.DAYTONA_API_KEY);
@@ -35,8 +28,10 @@ const sandboxService = Effect.gen(function* () {
   );
 
   return {
-    createSandbox: (config: SandboxConfig) =>
+    createSandbox: (name: RepoName) =>
       Effect.gen(function* () {
+        const config = contextRepos[name];
+
         yield* Effect.log(
           `Creating sandbox from snapshot ${config.snapshotName}...`
         );
@@ -76,9 +71,10 @@ const sandboxService = Effect.gen(function* () {
 
         return sandbox;
       }),
-    setupConfig: (args: { sandbox: Sandbox; config: SandboxConfig }) =>
+    setupConfig: (args: { sandbox: Sandbox; name: RepoName }) =>
       Effect.gen(function* () {
-        const { sandbox, config } = args;
+        const { sandbox, name } = args;
+        const config = contextRepos[name];
 
         yield* Effect.log("Setting up config...");
 
@@ -109,7 +105,7 @@ const sandboxService = Effect.gen(function* () {
           [
             Effect.tryPromise(() =>
               sandbox.fs.uploadFile(
-                Buffer.from(DOCS_AGENT_PROMPT(config.repoName)),
+                Buffer.from(DOCS_AGENT_PROMPT(name)),
                 promptPath
               )
             ),
@@ -121,9 +117,7 @@ const sandboxService = Effect.gen(function* () {
             ),
             Effect.tryPromise(() =>
               sandbox.fs.uploadFile(
-                Buffer.from(
-                  JSON.stringify(getOpenCodeConfig(config.repoName), null, 2)
-                ),
+                Buffer.from(JSON.stringify(getOpenCodeConfig(name), null, 2)),
                 configPath
               )
             ),
