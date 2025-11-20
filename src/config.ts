@@ -33,6 +33,12 @@ export const contextRepos = {
     branch: "main",
     snapshotName: "daytona-docs-snapshot",
   },
+  neverthrow: {
+    name: "neverthrow",
+    url: "https://github.com/supermacro/neverthrow",
+    branch: "master",
+    snapshotName: "neverthrow-docs-snapshot",
+  },
 } satisfies Record<string, ContextRepo>;
 
 export type RepoName = keyof typeof contextRepos;

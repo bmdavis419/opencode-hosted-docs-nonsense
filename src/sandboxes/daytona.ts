@@ -15,9 +15,11 @@ const program = Effect.gen(function* () {
   Effect.matchCause({
     onSuccess: () => {
       console.log("Sandbox ran successfully");
+      process.exit(0);
     },
     onFailure: (cause) => {
       console.error("Failed to run sandbox", cause);
+      process.exit(1);
     },
   })
 );

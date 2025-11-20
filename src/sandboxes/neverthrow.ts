@@ -4,8 +4,8 @@ import { SandboxService } from "../services/sandbox";
 const program = Effect.gen(function* () {
   const service = yield* SandboxService;
 
-  const sandbox = yield* service.createSandbox("opencode");
-  yield* service.setupConfig({ sandbox, name: "opencode" });
+  const sandbox = yield* service.createSandbox("neverthrow");
+  yield* service.setupConfig({ sandbox, name: "neverthrow" });
   yield* service.setupSshAccess({ sandbox });
   yield* service.startServer({ sandbox });
 }).pipe(
@@ -37,3 +37,4 @@ process.on("SIGTERM", async () => {
   await pipe(programFiber, Fiber.interrupt, Effect.runPromise);
   process.exit(0);
 });
+

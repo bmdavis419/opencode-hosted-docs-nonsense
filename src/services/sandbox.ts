@@ -159,6 +159,10 @@ const sandboxService = Effect.gen(function* () {
       Effect.scoped(
         Effect.gen(function* () {
           const { sandbox } = args;
+          const runInBackground = yield* Effect.sync(
+            () => env.RUN_IN_BACKGROUND === "true"
+          );
+
           yield* Effect.log("Starting server...");
 
           const serverFork = yield* pipe(
@@ -219,10 +223,6 @@ const sandboxService = Effect.gen(function* () {
 
           console.log(
             `CONNECT WITH LOCAL TERMINAL: opencode attach ${previewLink.url}\n\n`
-          );
-
-          const runInBackground = yield* Effect.sync(
-            () => env.RUN_IN_BACKGROUND === "true"
           );
 
           if (!runInBackground) {

@@ -8,7 +8,8 @@
     "snapshot:effect": "bun run src/scripts/snapshots/effect.ts",
     "snapshot:daytona": "bun run src/scripts/snapshots/daytona.ts",
     "snapshot:opencode": "bun run src/scripts/snapshots/opencode.ts",
-    "snapshot:all": "bun run src/scripts/snapshots/svelte.ts && bun run src/scripts/snapshots/effect.ts && bun run src/scripts/snapshots/daytona.ts && bun run src/scripts/snapshots/opencode.ts",
+    "snapshot:neverthrow": "bun run src/scripts/snapshots/neverthrow.ts",
+    "snapshot:all": "bun run src/scripts/snapshots/svelte.ts && bun run src/scripts/snapshots/effect.ts && bun run src/scripts/snapshots/daytona.ts && bun run src/scripts/snapshots/opencode.ts && bun run src/scripts/snapshots/neverthrow.ts",
     "start:svelte": "bun run src/sandboxes/svelte.ts",
     "start:svelte:bg": "RUN_IN_BACKGROUND=true bun run src/sandboxes/svelte.ts",
     "start:effect": "bun run src/sandboxes/effect.ts",
@@ -16,7 +17,9 @@
     "start:daytona": "bun run src/sandboxes/daytona.ts",
     "start:daytona:bg": "RUN_IN_BACKGROUND=true bun run src/sandboxes/daytona.ts",
     "start:opencode": "bun run src/sandboxes/opencode.ts",
-    "start:opencode:bg": "RUN_IN_BACKGROUND=true bun run src/sandboxes/opencode.ts"
+    "start:opencode:bg": "RUN_IN_BACKGROUND=true bun run src/sandboxes/opencode.ts",
+    "start:neverthrow": "bun run src/sandboxes/neverthrow.ts",
+    "start:neverthrow:bg": "RUN_IN_BACKGROUND=true bun run src/sandboxes/neverthrow.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
