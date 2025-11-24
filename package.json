@@ -19,7 +19,9 @@
     "start:opencode": "bun run src/sandboxes/opencode.ts",
     "start:opencode:bg": "RUN_IN_BACKGROUND=true bun run src/sandboxes/opencode.ts",
     "start:neverthrow": "bun run src/sandboxes/neverthrow.ts",
-    "start:neverthrow:bg": "RUN_IN_BACKGROUND=true bun run src/sandboxes/neverthrow.ts"
+    "start:neverthrow:bg": "RUN_IN_BACKGROUND=true bun run src/sandboxes/neverthrow.ts",
+    "start:server": "bun run src/server.ts",
+    "check": "bun run --bun tsc --noEmit"
   },
   "devDependencies": {
     "@types/bun": "latest",

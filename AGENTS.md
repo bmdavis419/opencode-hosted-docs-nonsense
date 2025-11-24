@@ -3,8 +3,11 @@
 ## Build & Test Commands
 
 - **Run code**: `bun src/index.ts`
-- **Type check**: `bunx tsc --noEmit`
+- **Type check**: `bun run check` (runs `tsc --noEmit`)
+- **Start API server**: `bun run start:server`
 - **No test suite** - this is a minimal project focused on the Daytona SDK
+
+**Important**: After making any code changes, always run `bun run check` to verify there are no type errors.
 
 ## Code Style Guidelines
 
