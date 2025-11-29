@@ -1,5 +1,7 @@
 # hosting an opencode instance with access to docs...
 
+I'M WORKING ON A BETTER VERSION: https://github.com/bmdavis419/better-context
+
 ## how to use this
 
 0. clone repo
