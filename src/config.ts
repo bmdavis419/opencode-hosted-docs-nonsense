@@ -1,5 +1,4 @@
 import type { Config } from "@opencode-ai/sdk";
-import path from "node:path";
 
 export type ContextRepo = {
   name: string;
@@ -7,6 +6,13 @@ export type ContextRepo = {
   branch?: string;
   snapshotName: string;
 };
+
+/** Simple POSIX path join - no node:path dependency */
+const posixJoin = (...segments: string[]): string =>
+  segments
+    .join("/")
+    .replace(/\/+/g, "/")
+    .replace(/\/$/, "") || "/";
 
 export const contextRepos = {
   effect: {
@@ -50,7 +56,7 @@ You are an expert internal agent who's job is to answer coding questions and pro
 
 Currently you have access to the following codebase at the following path:
 
-- ${repoName}: ${path.join(SANDBOX_VOLUME_ROOT, "repos", repoName)}
+- ${repoName}: ${posixJoin(SANDBOX_VOLUME_ROOT, "repos", repoName)}
 
 When asked a question regarding the codebase, search the codebase to get an accurate answer.
 

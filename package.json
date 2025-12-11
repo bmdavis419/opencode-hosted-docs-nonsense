@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "@daytonaio/sdk": "^0.115.2",
+    "@effect/platform": "^0.93.6",
+    "@effect/platform-bun": "^0.86.0",
     "@opencode-ai/sdk": "^1.0.150",
     "effect": "^3.19.11"
   }

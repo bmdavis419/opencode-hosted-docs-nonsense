@@ -1,7 +1,8 @@
 import type { Sandbox } from "@daytonaio/sdk";
 import { Daytona } from "@daytonaio/sdk";
+import { Path } from "@effect/platform";
+import { BunPath } from "@effect/platform-bun";
 import { env } from "bun";
-import path from "node:path";
 import { Effect, Fiber, pipe } from "effect";
 import {
   ASK_AGENT_PROMPT,
@@ -13,6 +14,7 @@ import {
 } from "../config";
 
 const sandboxService = Effect.gen(function* () {
+  const path = yield* Path.Path;
   const apiKey = yield* Effect.sync(() => env.DAYTONA_API_KEY);
   if (!apiKey) {
     yield* Effect.die("DAYTONA_API_KEY is not set");
@@ -74,7 +76,6 @@ const sandboxService = Effect.gen(function* () {
     setupConfig: (args: { sandbox: Sandbox; name: RepoName }) =>
       Effect.gen(function* () {
         const { sandbox, name } = args;
-        const config = contextRepos[name];
 
         yield* Effect.log("Setting up config...");
 
@@ -356,7 +357,7 @@ const sandboxService = Effect.gen(function* () {
 export class SandboxService extends Effect.Service<SandboxService>()(
   "SandboxService",
   {
-    dependencies: [],
+    dependencies: [BunPath.layer],
     scoped: sandboxService,
   }
 ) {}
