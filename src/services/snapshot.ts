@@ -17,6 +17,7 @@ export const createSnapshot = (config: ContextRepo) =>
       daytona.snapshot.create(
         {
           name: config.snapshotName,
+
           image: Image.base("debian:stable-slim")
             .runCommands(
               "apt-get update",
@@ -50,4 +51,3 @@ export const createSnapshot = (config: ContextRepo) =>
       )
     );
   });
-

@@ -28,11 +28,11 @@
     "json-schema-to-typescript": "^15.0.4"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@daytonaio/sdk": "^0.115.0",
-    "@opencode-ai/sdk": "^1.0.68",
-    "effect": "^3.19.4"
+    "@daytonaio/sdk": "^0.115.2",
+    "@opencode-ai/sdk": "^1.0.150",
+    "effect": "^3.19.11"
   }
 }
